@@ -1,9 +1,5 @@
 package com.example.module_app;
 
-import com.example.module_app.modules.*;
-import com.example.module_app.ui.ConsoleUI;
-import com.example.module_app.util.FileHelper;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 

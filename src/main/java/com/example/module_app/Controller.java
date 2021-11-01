@@ -33,7 +33,7 @@ public class Controller {
     public File file;
 
     public void startWork(ApplicationContext applicationContext) throws ImageProcessingException, IOException {
-        File fileOrDirectory = figureOutFileOrDirectory();
+        figureOutFileOrDirectory();
         String nameOfModule = figureOutModule(applicationContext);
         if(nameOfModule != null){
             Object module = applicationContext.getBean(nameOfModule);
@@ -62,10 +62,9 @@ public class Controller {
         return modules.get(consoleUI.getNumber());
     }
 
-    private File figureOutFileOrDirectory(){
+    private void figureOutFileOrDirectory(){
         fileHelper.findAndSetFile(consoleUI.getFileName());
         file = fileHelper.getFile();
-        return file;
     }
 
     private void workWithDirectory(){

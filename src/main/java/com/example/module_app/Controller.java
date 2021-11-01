@@ -50,6 +50,9 @@ public class Controller {
                 workWithMusicFile();
             }
         }
+        else {
+            consoleUI.showMsgModuleNotSupport();
+        }
     }
 
     private String figureOutModule(ApplicationContext applicationContext){
@@ -59,7 +62,7 @@ public class Controller {
         return modules.get(consoleUI.getNumber());
     }
 
-    private File figureOutFileOrDirectory() throws ImageProcessingException, IOException {
+    private File figureOutFileOrDirectory(){
         fileHelper.findAndSetFile(consoleUI.getFileName());
         file = fileHelper.getFile();
         return file;
@@ -67,7 +70,10 @@ public class Controller {
 
     private void workWithDirectory(){
         int num = initialization(directoryHandler);
-        if(num == 0) return;
+        if(num == 0) {
+            consoleUI.showMsgFunctionNotSupport();
+            return;
+        }
         switch (num){
             case 1: consoleUI.showListOfItem(directoryHandler.getAllFilesInside());
                 break;
@@ -80,7 +86,10 @@ public class Controller {
 
     private void workWithImageFile() throws ImageProcessingException, IOException {
         int num = initialization(imageFileHandler);
-        if(num == 0) return;
+        if(num == 0) {
+            consoleUI.showMsgFunctionNotSupport();
+            return;
+        }
         switch (num){
             case 1: consoleUI.showSomeString(String.valueOf(imageFileHandler.getImageSizeInKb()));
                 break;
@@ -93,7 +102,10 @@ public class Controller {
 
     private void workWithTextFile() throws IOException {
         int num = initialization(textFileHandler);
-        if(num == 0) return;
+        if(num == 0) {
+            consoleUI.showMsgFunctionNotSupport();
+            return;
+        }
         switch (num){
             case 1: consoleUI.showSomeString(String.valueOf(textFileHandler.getAllLinesCount()));
                 break;
@@ -106,7 +118,10 @@ public class Controller {
 
     private void workWithMusicFile() throws ImageProcessingException, IOException {
         int num = initialization(musicFileHandler);
-        if(num == 0) return;
+        if(num == 0) {
+            consoleUI.showMsgFunctionNotSupport();
+            return;
+        }
         switch (num){
             case 1: consoleUI.showListOfItem(musicFileHandler.getMusicNameAndTags());
                 break;
@@ -126,6 +141,6 @@ public class Controller {
         }
         else
             consoleUI.showMsgFormatNotSupport();
-        return num;
+        return num < 1 || num > 3 ? 0 : num;
     }
 }

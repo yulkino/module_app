@@ -14,13 +14,19 @@ public class ConsoleUI {
     public String getFileName(){
         Scanner in = new Scanner(System.in);
         System.out.print("Введите имя файла (с расширением) или директории: ");
-        String fileName = in.nextLine();
-        //in.close();
-        return fileName;
+        return in.nextLine();
     }
 
     public void showMsgFormatNotSupport(){
         System.out.println("Формат не поддерживается");
+    }
+
+    public void showMsgModuleNotSupport(){
+        System.out.println("Модуль не поддерживается");
+    }
+
+    public void showMsgFunctionNotSupport(){
+        System.out.println("Функция не поддерживается");
     }
 
     public void showSomeString(String description){
@@ -30,9 +36,7 @@ public class ConsoleUI {
     public int getNumber(){
         Scanner in = new Scanner(System.in);
         System.out.print("Введите номер: ");
-        int num = in.nextInt();
-        //in.close();
-        return num;
+        return in.nextInt();
     }
 
     public <T> void showListOfItem(List<T> items){

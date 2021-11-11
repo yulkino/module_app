@@ -2,6 +2,7 @@ package com.example.module_app;
 
 import com.drew.imaging.ImageProcessingException;
 import com.example.module_app.modules.*;
+import com.example.module_app.modules.directory_handlers.DirectoryContentHandler;
 import com.example.module_app.ui.ConsoleUI;
 import com.example.module_app.util.FileHelper;
 import com.example.module_app.util.ModuleHelper;
@@ -11,7 +12,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class Controller {
@@ -21,125 +25,57 @@ public class Controller {
     @Autowired
     public ConsoleUI consoleUI;
     @Autowired
-    public DirectoryHandler directoryHandler;
-    @Autowired
-    public ImageFileHandler imageFileHandler;
-    @Autowired
-    public MusicFileHandler musicFileHandler;
-    @Autowired
-    public TextFileHandler textFileHandler;
-    @Autowired
     public ModuleHelper moduleHelper;
-    public File file;
 
     public void startWork(ApplicationContext applicationContext) throws ImageProcessingException, IOException {
-        figureOutFileOrDirectory();
-        String nameOfModule = figureOutModule(applicationContext);
-        if(nameOfModule != null){
-            Object module = applicationContext.getBean(nameOfModule);
-            if(directoryHandler.getClass().equals(module.getClass())){
-                workWithDirectory();
-            }
-            else if(imageFileHandler.getClass().equals(module.getClass())){
-                workWithImageFile();
-            }
-            else if(textFileHandler.getClass().equals(module.getClass())){
-                workWithTextFile();
-            }
-            else if(musicFileHandler.getClass().equals(module.getClass())){
-                workWithMusicFile();
-            }
+        var handlers = moduleHelper.getHandlers(applicationContext);
+        var file = getFile();
+
+        var appropriateHandlers = handlers
+                .entrySet()
+                .stream()
+                .filter(handler -> handler.getValue().isExtendService(file))
+                .collect(Collectors.toList());
+
+        var size = appropriateHandlers.size();
+
+        switch(size){
+            case 0:
+                noModules();
+                break;
+            case 1:
+                processSingleHandler(appropriateHandlers.get(0).getValue(), file);
+                break;
+            default:
+                choseHandler(appropriateHandlers, file);
+                break;
         }
-        else {
-            consoleUI.showMsgModuleNotSupport();
-        }
+
     }
 
-    private String figureOutModule(ApplicationContext applicationContext){
-        moduleHelper.checkBeansPresence(applicationContext);
-        Map<Integer, String> modules = moduleHelper.getModules();
-        consoleUI.showMap(modules);
-        return modules.get(consoleUI.getNumber());
+    private File getFile(){
+        return fileHelper.findAndSetFile(consoleUI.getFileName());
     }
 
-    private void figureOutFileOrDirectory(){
-        fileHelper.findAndSetFile(consoleUI.getFileName());
-        file = fileHelper.getFile();
+    private void noModules() {
+        consoleUI.showMsgFormatNotSupport();
     }
 
-    private void workWithDirectory(){
-        int num = initialization(directoryHandler);
-        if(num == 0) {
-            consoleUI.showMsgFunctionNotSupport();
-            return;
-        }
-        switch (num){
-            case 1: consoleUI.showListOfItem(directoryHandler.getAllFilesInside());
-                break;
-            case 2: consoleUI.showSomeString(String.valueOf(directoryHandler.getAllFilesSizeInKb()));
-                break;
-            case 3: consoleUI.showSomeString(String.valueOf(directoryHandler.getDirectoriesCount()));
-                break;
-        }
+    private void processSingleHandler(Handler handler, File file) {
+        consoleUI.showSomeString(handler.getFunctionsDescription());
+        handler.process(file, consoleUI);
     }
 
-    private void workWithImageFile() throws ImageProcessingException, IOException {
-        int num = initialization(imageFileHandler);
-        if(num == 0) {
-            consoleUI.showMsgFunctionNotSupport();
-            return;
+    private void choseHandler(List<Map.Entry<String, Handler>> handlers, File file) {
+        var counter = 1;
+        for (var kvp : handlers) {
+            var name = kvp.getKey();
+            var handler = kvp.getValue();
+            consoleUI.showSomeString(counter++ + ". Хэндлер " + name + " - " + handler.getFunctionsDescription());
         }
-        switch (num){
-            case 1: consoleUI.showSomeString(String.valueOf(imageFileHandler.getImageSizeInKb()));
-                break;
-            case 2: consoleUI.showListOfItem(imageFileHandler.getExif());
-                break;
-            case 3: consoleUI.showSomeString(String.valueOf(imageFileHandler.getDataOfLastModifying()));
-                break;
-        }
-    }
 
-    private void workWithTextFile() throws IOException {
-        int num = initialization(textFileHandler);
-        if(num == 0) {
-            consoleUI.showMsgFunctionNotSupport();
-            return;
-        }
-        switch (num){
-            case 1: consoleUI.showSomeString(String.valueOf(textFileHandler.getAllLinesCount()));
-                break;
-            case 2: consoleUI.showMap(textFileHandler.getCharsFrequency());
-                break;
-            case 3: consoleUI.showSomeString(String.valueOf(textFileHandler.getDataOfLastModifying()));
-                break;
-        }
-    }
+        var num = consoleUI.getNumber();
 
-    private void workWithMusicFile() throws ImageProcessingException, IOException {
-        int num = initialization(musicFileHandler);
-        if(num == 0) {
-            consoleUI.showMsgFunctionNotSupport();
-            return;
-        }
-        switch (num){
-            case 1: consoleUI.showListOfItem(musicFileHandler.getMusicNameAndTags());
-                break;
-            case 2: consoleUI.showSomeString(String.valueOf(musicFileHandler.getDuration()));
-                break;
-            case 3: consoleUI.showSomeString(String.valueOf(musicFileHandler.getDataOfLastModifying()));
-                break;
-        }
-    }
-
-    private int initialization(Handler handler){
-        handler.setFile(file);
-        int num = 0;
-        if(handler.isExtendService(fileHelper.getFileExtend())) {
-            consoleUI.showSomeString(handler.getFunctionsDescription());
-            num = consoleUI.getNumber();
-        }
-        else
-            consoleUI.showMsgFormatNotSupport();
-        return num < 1 || num > 3 ? 0 : num;
+        handlers.get(num - 1).getValue().process(file, consoleUI);
     }
 }

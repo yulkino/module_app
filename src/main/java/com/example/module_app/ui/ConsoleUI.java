@@ -19,14 +19,6 @@ public class ConsoleUI {
         System.out.println("Формат не поддерживается");
     }
 
-    public void showMsgModuleNotSupport(){
-        System.out.println("Модуль не поддерживается");
-    }
-
-    public void showMsgFunctionNotSupport(){
-        System.out.println("Функция не поддерживается");
-    }
-
     public void showSomeString(String description){
         System.out.println(description);
     }

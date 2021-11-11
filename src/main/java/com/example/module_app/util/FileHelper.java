@@ -7,30 +7,23 @@ import java.util.Locale;
 
 @Component
 public class FileHelper {
-
-    private File file;
-
-    public void findAndSetFile(String fileName){
+    public File findAndSetFile(String fileName){
+        File file = null;
         try{
-            this.file = new File(fileName);
+            file = new File(fileName);
         }
         catch (NullPointerException e){
             e.getMessage();
             System.out.println("File not found");
         }
+        return file;
     }
 
-    public String getFileExtend(){
+    public String getFileExtension(File file){
         String name = file.getName();
         String ext = "";
         if(name.contains("."))
             ext = name.substring(file.getName().indexOf('.')).replace(".", "").toLowerCase(Locale.ROOT);
         return ext;
     }
-
-    public File getFile() {
-        return file;
-    }
-
-
 }
